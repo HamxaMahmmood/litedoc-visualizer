@@ -1,0 +1,15 @@
+{
+  "name": "DeepSeek-VL2 Tiny (Baseline)",
+  "pruningRate": 0,
+  "totalParams": "3.37B",
+  "compressionRatio": 1.0,
+  "layers": [
+    {
+      "layerId": 0,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "experts": []
+    }
+  ]
+}
