@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import MoERoutingFlow from '@/components/visualizations/MoERoutingFlow';
 import MoEArchitecture3D from '@/components/visualizations/MoEArchitecture3D';
 import ModelStats from '@/components/visualizations/ModelStats';
 import ExpertRetentionChart from '@/components/visualizations/ExpertRetentionChart';
@@ -61,7 +60,7 @@ export default function Home() {
             Interactive MoE Expert Pruning & Token Routing
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">
-            3D Architecture View + Real-time Inference Simulation
+            3D Architecture Visualization with Real-time Inference Flow
           </p>
         </div>
 
@@ -103,25 +102,12 @@ export default function Home() {
                   <>
                     <ModelStats modelData={baselineData} />
                     
-                    {/* Two Column Layout */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Left: 3D Visualization */}
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                          3D Architecture
-                        </h3>
-                        <MoEArchitecture3D modelData={baselineData} />
-                      </div>
-
-                      {/* Right: 2D Flow + Chart */}
-                      <div className="space-y-6">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                            Token Routing Simulation
-                          </h3>
-                          <MoERoutingFlow modelData={baselineData} />
-                        </div>
-                      </div>
+                    {/* Full Width 3D Visualization */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                        3D Architecture & Token Routing
+                      </h3>
+                      <MoEArchitecture3D modelData={baselineData} />
                     </div>
 
                     {/* Full Width Chart */}
@@ -148,25 +134,12 @@ export default function Home() {
                   <>
                     <ModelStats modelData={pruned40Data} />
                     
-                    {/* Two Column Layout */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Left: 3D Visualization */}
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                          3D Architecture
-                        </h3>
-                        <MoEArchitecture3D modelData={pruned40Data} />
-                      </div>
-
-                      {/* Right: 2D Flow + Chart */}
-                      <div className="space-y-6">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                            Token Routing Simulation
-                          </h3>
-                          <MoERoutingFlow modelData={pruned40Data} />
-                        </div>
-                      </div>
+                    {/* Full Width 3D Visualization */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                        3D Architecture & Token Routing
+                      </h3>
+                      <MoEArchitecture3D modelData={pruned40Data} />
                     </div>
 
                     {/* Full Width Chart */}
@@ -193,25 +166,12 @@ export default function Home() {
                   <>
                     <ModelStats modelData={pruned80Data} />
                     
-                    {/* Two Column Layout */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Left: 3D Visualization */}
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                          3D Architecture
-                        </h3>
-                        <MoEArchitecture3D modelData={pruned80Data} />
-                      </div>
-
-                      {/* Right: 2D Flow + Chart */}
-                      <div className="space-y-6">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                            Token Routing Simulation
-                          </h3>
-                          <MoERoutingFlow modelData={pruned80Data} />
-                        </div>
-                      </div>
+                    {/* Full Width 3D Visualization */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                        3D Architecture & Token Routing
+                      </h3>
+                      <MoEArchitecture3D modelData={pruned80Data} />
                     </div>
 
                     {/* Full Width Chart */}
