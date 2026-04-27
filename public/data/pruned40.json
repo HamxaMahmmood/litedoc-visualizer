@@ -1,0 +1,89 @@
+{
+  "name": "LiteDoc-60 (40% Pruned)",
+  "pruningRate": 40,
+  "totalParams": "2.4B",
+  "compressionRatio": 1.4,
+  "retainedExperts": 38,
+  "performanceScore": 81.2,
+  "vramUsage": "9.8 GB",
+  "throughput": "58.1 tok/s",
+  "layers": [
+    {
+      "layerId": 0,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 14200
+    },
+    {
+      "layerId": 1,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 13800
+    },
+    {
+      "layerId": 2,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 13500
+    },
+    {
+      "layerId": 3,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 13100
+    },
+    {
+      "layerId": 4,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 15300
+    },
+    {
+      "layerId": 5,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 16300
+    },
+    {
+      "layerId": 6,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 16800
+    },
+    {
+      "layerId": 7,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 17500
+    },
+    {
+      "layerId": 8,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 18600
+    },
+    {
+      "layerId": 9,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 19600
+    },
+    {
+      "layerId": 10,
+      "totalExperts": 64,
+      "activeExperts": 38,
+      "prunedExperts": 26,
+      "avgTokensPerExpert": 20100
+    }
+  ]
+}

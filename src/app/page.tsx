@@ -1,70 +1,233 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import MoERoutingFlow from '@/components/visualizations/MoERoutingFlow';
+import MoEArchitecture3D from '@/components/visualizations/MoEArchitecture3D';
+import ModelStats from '@/components/visualizations/ModelStats';
+import ExpertRetentionChart from '@/components/visualizations/ExpertRetentionChart';
+import { ModelConfig } from '@/types/model';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
+  const [baselineData, setBaselineData] = useState<ModelConfig | null>(null);
+  const [pruned40Data, setPruned40Data] = useState<ModelConfig | null>(null);
+  const [pruned80Data, setPruned80Data] = useState<ModelConfig | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [baseline, pruned40, pruned80] = await Promise.all([
+          fetch('/data/baseline.json').then(res => res.json()),
+          fetch('/data/pruned40.json').then(res => res.json()),
+          fetch('/data/pruned80.json').then(res => res.json()),
+        ]);
+
+        setBaselineData(baseline);
+        setPruned40Data(pruned40);
+        setPruned80Data(pruned80);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Loading visualizations...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+    <main className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="max-w-[1800px] mx-auto">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
             LiteDoc Visualization
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Interactive visualization of MoE expert pruning and token routing patterns
+          <p className="text-slate-600 dark:text-slate-400 text-lg">
+            Interactive MoE Expert Pruning & Token Routing
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">
+            3D Architecture View + Real-time Inference Simulation
           </p>
         </div>
 
         <Tabs defaultValue="baseline" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="baseline">Baseline (0% Pruned)</TabsTrigger>
-            <TabsTrigger value="pruned40">40% Pruned</TabsTrigger>
-            <TabsTrigger value="pruned80">80% Pruned</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+            <TabsTrigger 
+              value="baseline"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Baseline (0%)
+            </TabsTrigger>
+            <TabsTrigger 
+              value="pruned40"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+            >
+              40% Pruned
+            </TabsTrigger>
+            <TabsTrigger 
+              value="pruned80"
+              className="data-[state=active]:bg-pink-600 data-[state=active]:text-white"
+            >
+              80% Pruned
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="baseline" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>DeepSeek-VL2 Tiny - Baseline Model</CardTitle>
+          {/* Baseline Tab */}
+          <TabsContent value="baseline" className="space-y-6">
+            <Card className="border-2 border-blue-200 dark:border-blue-800">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-950 dark:to-slate-900">
+                <CardTitle className="text-blue-900 dark:text-blue-100">
+                  {baselineData?.name}
+                </CardTitle>
                 <CardDescription>
-                  Full model with 64 experts per layer (3.37B parameters)
+                  Full model with 64 experts per layer • 3.37B parameters
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">Visualizations will appear here</p>
+              <CardContent className="pt-6 space-y-6">
+                {baselineData && (
+                  <>
+                    <ModelStats modelData={baselineData} />
+                    
+                    {/* Two Column Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Left: 3D Visualization */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                          3D Architecture
+                        </h3>
+                        <MoEArchitecture3D modelData={baselineData} />
+                      </div>
+
+                      {/* Right: 2D Flow + Chart */}
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                            Token Routing Simulation
+                          </h3>
+                          <MoERoutingFlow modelData={baselineData} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Full Width Chart */}
+                    <ExpertRetentionChart modelData={baselineData} />
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="pruned40" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>LiteDoc-60 - 40% Pruned Model</CardTitle>
+          {/* 40% Pruned Tab */}
+          <TabsContent value="pruned40" className="space-y-6">
+            <Card className="border-2 border-purple-200 dark:border-purple-800">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950 dark:to-slate-900">
+                <CardTitle className="text-purple-900 dark:text-purple-100">
+                  {pruned40Data?.name}
+                </CardTitle>
                 <CardDescription>
-                  ~38 experts per layer (2.4B parameters, 1.4× compression)
+                  ~38 experts per layer • 2.4B parameters • 1.4× compression
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">Visualizations will appear here</p>
+              <CardContent className="pt-6 space-y-6">
+                {pruned40Data && (
+                  <>
+                    <ModelStats modelData={pruned40Data} />
+                    
+                    {/* Two Column Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Left: 3D Visualization */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                          3D Architecture
+                        </h3>
+                        <MoEArchitecture3D modelData={pruned40Data} />
+                      </div>
+
+                      {/* Right: 2D Flow + Chart */}
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                            Token Routing Simulation
+                          </h3>
+                          <MoERoutingFlow modelData={pruned40Data} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Full Width Chart */}
+                    <ExpertRetentionChart modelData={pruned40Data} />
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="pruned80" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>LiteDoc-20 - 80% Pruned Model</CardTitle>
+          {/* 80% Pruned Tab */}
+          <TabsContent value="pruned80" className="space-y-6">
+            <Card className="border-2 border-pink-200 dark:border-pink-800">
+              <CardHeader className="bg-gradient-to-r from-pink-50 to-white dark:from-pink-950 dark:to-slate-900">
+                <CardTitle className="text-pink-900 dark:text-pink-100">
+                  {pruned80Data?.name}
+                </CardTitle>
                 <CardDescription>
-                  ~13 experts per layer (1.4B parameters, 2.4× compression)
+                  ~13 experts per layer • 1.4B parameters • 2.4× compression
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">Visualizations will appear here</p>
+              <CardContent className="pt-6 space-y-6">
+                {pruned80Data && (
+                  <>
+                    <ModelStats modelData={pruned80Data} />
+                    
+                    {/* Two Column Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Left: 3D Visualization */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                          3D Architecture
+                        </h3>
+                        <MoEArchitecture3D modelData={pruned80Data} />
+                      </div>
+
+                      {/* Right: 2D Flow + Chart */}
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                            Token Routing Simulation
+                          </h3>
+                          <MoERoutingFlow modelData={pruned80Data} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Full Width Chart */}
+                    <ExpertRetentionChart modelData={pruned80Data} />
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Footer */}
+        <div className="mt-12 text-center text-sm text-slate-500 dark:text-slate-600">
+          <p>LiteDoc: Distilling Large Document Models into Efficient Task-Specific Encoders</p>
+          <p className="mt-1">ICDAR 2026 Submission</p>
+        </div>
       </div>
     </main>
   );

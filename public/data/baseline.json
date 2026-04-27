@@ -3,13 +3,87 @@
   "pruningRate": 0,
   "totalParams": "3.37B",
   "compressionRatio": 1.0,
+  "retainedExperts": 64,
+  "performanceScore": 85.48,
+  "vramUsage": "12.3 GB",
+  "throughput": "47.2 tok/s",
   "layers": [
     {
       "layerId": 0,
       "totalExperts": 64,
       "activeExperts": 64,
       "prunedExperts": 0,
-      "experts": []
+      "avgTokensPerExpert": 8500
+    },
+    {
+      "layerId": 1,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 8200
+    },
+    {
+      "layerId": 2,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 8100
+    },
+    {
+      "layerId": 3,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 7900
+    },
+    {
+      "layerId": 4,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 9200
+    },
+    {
+      "layerId": 5,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 9800
+    },
+    {
+      "layerId": 6,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 10100
+    },
+    {
+      "layerId": 7,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 10500
+    },
+    {
+      "layerId": 8,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 11200
+    },
+    {
+      "layerId": 9,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 11800
+    },
+    {
+      "layerId": 10,
+      "totalExperts": 64,
+      "activeExperts": 64,
+      "prunedExperts": 0,
+      "avgTokensPerExpert": 12100
     }
   ]
 }
