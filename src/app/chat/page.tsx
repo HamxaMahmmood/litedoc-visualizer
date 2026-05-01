@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useChat } from '@ai-sdk/react'; // ✅ Correct import for ai@6+
 import { Send, ImagePlus, Trash2, MessageSquare, Home, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,15 +29,12 @@ export default function ChatPage() {
   const [chatHistories, setChatHistories] = useState<ChatHistory[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<CustomMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
-    api: '/api/chat',
-    body: {
-      image: uploadedImage,
-    },
-  });
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -50,13 +46,18 @@ export default function ChatPage() {
     if (messages.length === 0) return;
 
     const chatId = currentChatId || Date.now().toString();
-    const title = messages[0]?.content.slice(0, 50) + '...' || 'New Chat';
+    const firstMessageText = messages[0]?.content || '';
+    const title = (firstMessageText.slice(0, 50) + '...') || 'New Chat';
 
     const newHistory: ChatHistory = {
       id: chatId,
       title,
       timestamp: new Date(),
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
+      messages: messages.map(m => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+      })),
     };
 
     setChatHistories(prev => {
@@ -74,14 +75,56 @@ export default function ChatPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+  const compressImageFile = async (file: File) => {
+    const imageBitmap = await createImageBitmap(file);
+    const maxDimension = 1024;
+    const scale = Math.min(
+      1,
+      maxDimension / Math.max(imageBitmap.width, imageBitmap.height),
+    );
+    const width = Math.round(imageBitmap.width * scale);
+    const height = Math.round(imageBitmap.height * scale);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Browser does not support canvas');
+    }
+    ctx.drawImage(imageBitmap, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>(resolve =>
+      canvas.toBlob(resolve, 'image/jpeg', 0.7),
+    );
+    if (!blob) {
+      throw new Error('Unable to compress image');
+    }
+
+    return await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result as string);
+        if (reader.result) {
+          resolve(reader.result as string);
+        } else {
+          reject(new Error('Unable to read compressed image'));
+        }
       };
-      reader.readAsDataURL(file);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const compressed = await compressImageFile(file);
+        setUploadedImage(compressed);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setApiError(`Image upload failed: ${message}`);
+      }
     }
   };
 
@@ -99,20 +142,60 @@ export default function ChatPage() {
   };
 
   const loadChatHistory = (history: ChatHistory) => {
-    // ✅ Use ai-sdk's Message structure (has `id`, `role`, `content`)
-    setMessages(history.messages.map((m, i) => ({
-      id: `${history.id}-${i}`,
-      role: m.role as 'user' | 'assistant', // ✅ Cast to correct type
-      content: m.content,
-    })));
+    setMessages(history.messages);
     setCurrentChatId(history.id);
     setShowHistory(false);
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleSubmit(e);
-    setUploadedImage(null); // ✅ Clear image after submit
+
+    const question = input.trim();
+    if (!question && !uploadedImage) return;
+
+    const userMessage: CustomMessage = {
+      id: `${Date.now()}-user`,
+      role: 'user',
+      content: question || 'Image-based question',
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+    setApiError(null);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question,
+          image: uploadedImage,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Model API error');
+      }
+
+      const answer = await response.text();
+      const assistantMessage: CustomMessage = {
+        id: `${Date.now()}-assistant`,
+        role: 'assistant',
+        content: answer,
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      setUploadedImage(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setApiError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -249,7 +332,7 @@ export default function ChatPage() {
               </div>
             ) : (
               <>
-                {messages.map((message) => (  // ✅ No need to type `message` - ai-sdk provides correct type
+                {messages.map((message) => (
                   <div
                     key={message.id}
                     className={`flex ${
@@ -263,7 +346,6 @@ export default function ChatPage() {
                           : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'
                       }`}
                     >
-                      {/* ✅ Wrap ReactMarkdown in div for className */}
                       <div className="prose prose-sm dark:prose-invert max-w-none">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {message.content}
@@ -307,7 +389,7 @@ export default function ChatPage() {
                 </button>
               </div>
             )}
-            <form onSubmit={onSubmit} className="flex gap-2">
+            <form onSubmit={onSubmit} className="flex gap-2" autoComplete="off">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -326,13 +408,14 @@ export default function ChatPage() {
               </Button>
               <Textarea
                 value={input}
-                onChange={handleInputChange}
+                onChange={e => setInput(e.target.value)}
                 placeholder="Ask a question about your document..."
                 className="min-h-[60px] resize-none"
+                autoComplete="off"
                 onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    handleSubmit(e as any);
+                    onSubmit(e as any);
                   }
                 }}
               />
