@@ -3,7 +3,7 @@ export const runtime = 'nodejs';
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 const HUGGINGFACE_MODEL =
   process.env.HUGGINGFACE_MODEL || 'microsoft/git-base-vqav2';
-const BACKEND_API_KEY = process.env.BACKEND_API_KEY;
+const BACKEND_API_KEY = process.env.BACKEND_API_KEY as string;
 const BACKEND_MODEL = process.env.BACKEND_MODEL;
 const BACKEND_INFERENCE_URL = process.env.BACKEND_INFERENCE_URL;
 const HUGGINGFACE_INFERENCE_URL = process.env.HUGGINGFACE_INFERENCE_URL;
